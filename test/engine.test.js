@@ -295,7 +295,10 @@ describe('cloud symbol', () => {
     const sym = { id: 'c', type: 'cloud', x: 0, y: 0, w: 140, h: 90 };
     expect(F.nodeMeta(sym)).toBeNull();
     expect(F.nodeTitle(sym)).toBe('Cloud');
-    const doc = F.cleanDoc({ sheets: [{ nodes: [sym, { ...sym, id: 'd', icon: 'nope' }] }] });
+    const bad = ['nope', '__proto__/x', 'aws/../x', 'aws/<x>', '', null, 0, {}, ['aws/x']];
+    const doc = F.cleanDoc({ sheets: [{ nodes: [sym, ...bad.map((icon, i) => ({ ...sym, id: 'b' + i, icon }))] }] });
     expect(doc.sheets[0].nodes.map(n => n.id)).toEqual(['c']);
+    expect(doc.sheets[0].nodes[0].icon).toBeUndefined();
+    expect(F.nodeMeta({ ...sym, icon: '__proto__/x' })).toBeNull();
   });
 });
