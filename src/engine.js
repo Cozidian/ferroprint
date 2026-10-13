@@ -76,13 +76,13 @@ export const toolName = tool => (TOOL_NAMES[tool] || (toolShape(tool) || {}).nam
 export function nodeTitle(n) {
   if (n.type === 'class') return (UML[n.kind] || UML.class).name;
   if (n.type === 'zone' && n.pkg) return 'Package';
-  if (n.type !== 'cloud') return TYPE_NAME[n.type] || n.type;
+  if (n.type !== 'cloud' || !n.icon) return TYPE_NAME[n.type] || n.type;
   const ic = cloudIcon(n.icon);
   return ic ? cloudLabel(ic) : 'Cloud icon';
 }
-export const nodeMeta = n => (n.locked ? 'LOCKED' : n.type === 'cloud' ? PROVIDER_NAME[cloudProvider(n.icon)] : null);
 // The cloud set a shape needs: a cloud icon, or a zone with a frame icon.
 export const nodeCloud = n => (n.icon && isCloudKey(n.icon) ? cloudProvider(n.icon) : null);
+export const nodeMeta = n => (n.locked ? 'LOCKED' : n.type === 'cloud' && nodeCloud(n) ? PROVIDER_NAME[nodeCloud(n)] : null);
 export const THEMES = {
   blue: { paper: '#1e4d8c', ink: '#eef4ff', muted: 'rgba(238,244,255,0.74)', panel: '#1a4580', hover: 'rgba(238,244,255,0.10)', line: 'rgba(238,244,255,0.32)', minor: 'rgba(238,244,255,0.075)', major: 'rgba(238,244,255,0.17)', tint: 'rgba(238,244,255,0.10)', hatch: 'rgba(238,244,255,0.42)', accent: '#f4bf4f', accentInk: '#1a2a48', vig: 'rgba(3,12,36,0.40)', tex: [1, 1, 1] },
   white: { paper: '#f4f2eb', ink: '#24398a', muted: 'rgba(36,57,138,0.78)', panel: '#ece9df', hover: 'rgba(36,57,138,0.08)', line: 'rgba(36,57,138,0.30)', minor: 'rgba(36,57,138,0.07)', major: 'rgba(36,57,138,0.15)', tint: 'rgba(36,57,138,0.07)', hatch: 'rgba(36,57,138,0.38)', accent: '#d1432f', accentInk: '#ffffff', vig: 'rgba(80,64,20,0.14)', tex: [0.14, 0.22, 0.54] }
@@ -596,7 +596,8 @@ function cleanNode(n, ids) {
   if (!n || typeof n !== 'object') return null;
   const type = n.type;
   if (!SHAPES[type] && type !== 'path' && type !== 'line' && type !== 'cloud' && type !== 'class') return null;
-  if (type === 'cloud' && !isCloudKey(n.icon)) return null;
+  // A cloud without an icon is the library's Cloud symbol; one with an icon must name a known icon.
+  if (type === 'cloud' && n.icon !== undefined && !isCloudKey(n.icon)) return null;
   if (![n.x, n.y, n.w, n.h].every(num)) return null;
   let id = str(n.id);
   if (!id || ids.has(id)) id = uid();
