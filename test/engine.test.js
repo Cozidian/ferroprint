@@ -289,3 +289,13 @@ describe('project logo', () => {
     expect(F.pruneFiles(doc).files).toBeUndefined();
   });
 });
+
+describe('cloud symbol', () => {
+  it('tells the library Cloud symbol apart from a cloud icon', () => {
+    const sym = { id: 'c', type: 'cloud', x: 0, y: 0, w: 140, h: 90 };
+    expect(F.nodeMeta(sym)).toBeNull();
+    expect(F.nodeTitle(sym)).toBe('Cloud');
+    const doc = F.cleanDoc({ sheets: [{ nodes: [sym, { ...sym, id: 'd', icon: 'nope' }] }] });
+    expect(doc.sheets[0].nodes.map(n => n.id)).toEqual(['c']);
+  });
+});

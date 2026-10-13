@@ -76,11 +76,11 @@ export const toolName = tool => (TOOL_NAMES[tool] || (toolShape(tool) || {}).nam
 export function nodeTitle(n) {
   if (n.type === 'class') return (UML[n.kind] || UML.class).name;
   if (n.type === 'zone' && n.pkg) return 'Package';
-  if (n.type !== 'cloud') return TYPE_NAME[n.type] || n.type;
+  if (n.type !== 'cloud' || !n.icon) return TYPE_NAME[n.type] || n.type;
   const ic = cloudIcon(n.icon);
   return ic ? cloudLabel(ic) : 'Cloud icon';
 }
-export const nodeMeta = n => (n.locked ? 'LOCKED' : n.type === 'cloud' ? PROVIDER_NAME[cloudProvider(n.icon)] : null);
+export const nodeMeta = n => (n.locked ? 'LOCKED' : n.type === 'cloud' && n.icon ? PROVIDER_NAME[cloudProvider(n.icon)] : null);
 // The cloud set a shape needs: a cloud icon, or a zone with a frame icon.
 export const nodeCloud = n => (n.icon && isCloudKey(n.icon) ? cloudProvider(n.icon) : null);
 export const THEMES = {
@@ -596,7 +596,8 @@ function cleanNode(n, ids) {
   if (!n || typeof n !== 'object') return null;
   const type = n.type;
   if (!SHAPES[type] && type !== 'path' && type !== 'line' && type !== 'cloud' && type !== 'class') return null;
-  if (type === 'cloud' && !isCloudKey(n.icon)) return null;
+  // A cloud without an icon is the library's Cloud symbol; one with an icon must name a known icon.
+  if (type === 'cloud' && n.icon !== undefined && !isCloudKey(n.icon)) return null;
   if (![n.x, n.y, n.w, n.h].every(num)) return null;
   let id = str(n.id);
   if (!id || ids.has(id)) id = uid();

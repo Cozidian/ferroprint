@@ -88,7 +88,7 @@ function renderClass(n, ctx) {
 }
 
 export function renderNode(n, ctx) {
-  if (n.type === 'cloud') return renderCloud(n, ctx);
+  if (n.type === 'cloud' && n.icon) return renderCloud(n, ctx);
   if (n.type === 'class') return renderClass(n, ctx);
   const sym = SYMBOLS[n.type];
   if (sym) return renderSymbol(n, ctx, sym);
